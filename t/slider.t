@@ -8,6 +8,7 @@ use SDL ;
 use SDL::VideoInfo;
 
 use lib 'lib' ;
+use Moose ;
 
 use SDLx::App ;
 use SDLx::Rect ;
