@@ -17,21 +17,12 @@ use Any::Moose '::Util::TypeConstraints' ;
 
 has max_steps => ( is => 'rw', isa => 'Int', default  => 26 );
 
-has _bg_frame => (
+# tick method will draw on this surface
+has surface => (
     is       => 'ro',
     isa      => 'SDLx::Surface',
-    lazy     => 1,
-    builder  => '_build_bg_frame',
+    required     => 1,
 );
-
-sub _build_bg_frame { 
-    my $self = shift ;
-    my $s =  SDLx::Surface->new( width => $self->width, height => $self->height); 
-    SDL::Video::set_color_key( $s, 0, 0 );
-    SDL::Video::set_alpha($s, SDL_RLEACCEL, 0);
-    $self->image->blit($s) ;
-    return $s ;
-} 
 
 has image => ( 
     is => 'rw', 
@@ -57,6 +48,7 @@ has step => (
 
 sub start {
     my $self = shift;
+    say "start ",ref($self) ;
     $self->step( 1 ) ;
 }
 

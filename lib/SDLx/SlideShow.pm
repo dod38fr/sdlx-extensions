@@ -2,6 +2,10 @@ package SDLx::SlideShow;
 
 use Any::Moose;
 use 5.10.1 ;
+use Carp;
+use SDL ;
+use SDLx::Surface;
+use SDL::Color ;
 
 has slideshow_class => (
 	is => 'rw',
@@ -29,19 +33,36 @@ sub _new_image {
 	return unless defined $old_image ;
 
 	if ($new_image->w ne $old_image->w or $new_image->h ne $old_image->h) {
-		say "building new slider" ;
-		$self->{slider} = $self->_build_slider ;
+		croak "new image does not match old image size" ;
 	}
 	else {
 		$self->slider->image($new_image) ;
 	}
 }
 
+# slider's tick method will blit on this surface
+has surface => ( 
+    is => 'ro', 
+    isa => 'SDLx::Surface',
+    lazy => 1  ,
+	builder => '_build_surface' ,
+);
+
+sub _build_surface {
+	my $self = shift;
+
+    my $s =  SDLx::Surface->new( width => $self->width, height => $self->height); 
+    SDL::Video::set_color_key( $s, 0, 0 );
+    SDL::Video::set_alpha($s, SDL_RLEACCEL, 0);
+    $self->image->blit($s) ;
+    return $s ;
+}
+
 
 has 'slider' => (
 	is  => 'ro',
 	isa => 'SDLx::SlideShow::Any',
-	handles => [ qw/transition busy/ ] ,
+	handles => [ qw/tick busy/ ] ,
 	lazy => 1,
 	builder => '_build_slider' ,
 );
@@ -60,7 +81,7 @@ sub _build_slider {
             die "Could not parse $file_to_load: $@\n";
     } 
     
-    $slide_class->new( image => $self->image ) ;
+    $slide_class->new( image => $self->image , surface => $self->surface ) ;
 }
 
 

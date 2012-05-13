@@ -66,13 +66,13 @@ sub _new_image {
     $old->draw($self->_bg_frame->surface);
 }
 
-sub transition {
+sub tick {
     my $self = shift;
 
     if ( $self->busy ) {
         my $alpha = $self->progress( 0xFF )  ; 
         say "alpha $alpha, other ", 0xff - $alpha ;
-        my $transition = SDLx::Surface->new( width=> $self->width, height=> $self->height) ;
+        my $transition = $self->surface; #SDLx::Surface->new( width=> $self->width, height=> $self->height) ;
 
         $self->image->alpha($alpha) ;
         $self->_bg_frame->alpha(0xff - $alpha) ;
@@ -80,6 +80,7 @@ sub transition {
         # draw fading image on frame
         $self->_bg_frame->surface->blit( $transition);
         $self->image    ->surface->blit( $transition);
+        $transition->update ;
 
         $self->inc_step;
         return $transition ;

@@ -18,7 +18,7 @@ use Any::Moose '::Util::TypeConstraints' ;
 
 extends 'SDLx::SlideShow::Any' ;
 
-sub transition {
+sub tick {
     my $self = shift;
 
     if ($self->busy) {
@@ -28,12 +28,12 @@ sub transition {
         my $slide_width = int( $self->width / $max_s ) + 1 ;
 
         my $rect_to_blit = [ $slide_mark,0, $slide_width, $self->height ] ;
-        $self->image->blit($self->_bg_frame, $rect_to_blit, $rect_to_blit) ;
-        $self->_bg_frame->update ;
+        $self->image->blit($self->surface, $rect_to_blit, $rect_to_blit) ;
+        $self->surface->update ;
         $self->inc_step ;
     }
 
-    return $self->_bg_frame ;
+    return $self->surface ;
 }
 
 __PACKAGE__->meta->make_immutable();

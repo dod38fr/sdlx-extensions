@@ -31,7 +31,7 @@ while (@slides < 5) {
     push @slides, $slide_in;
 }
 
-my $test_only = shift @ARGV ;
+my $test_only = shift @ARGV || '';
 
 # my $slider = SDLx::Slider->new(image => $app) ;
 foreach my $s_file (glob("lib/SDLx/SlideShow/*.pm")) {
@@ -42,7 +42,7 @@ foreach my $s_file (glob("lib/SDLx/SlideShow/*.pm")) {
 
     my $s_class = $s_file ;
     next if $s_class =~ m!/Any.pm$!;
-    say "test $test_only" ;
+    say "test $test_only" if $test_only;
     next if $test_only and ($s_class !~ /$test_only/i) ;
     $s_class =~ s!.*/!!;
     $s_class =~ s!\.pm$!! ;
@@ -53,7 +53,8 @@ foreach my $s_file (glob("lib/SDLx/SlideShow/*.pm")) {
     while (@l_slides){
     
         foreach my $i (1.. 30) {
-            $slider ->transition ->blit($app) ;
+            $slider ->tick;
+            $slider->surface ->blit($app) ;
             $app->sync;
             SDL::delay(10) ;
         }

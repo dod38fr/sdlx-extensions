@@ -18,6 +18,13 @@ use Any::Moose '::Util::TypeConstraints' ;
 
 extends 'SDLx::SlideShow::Any' ;
 
+has _bg_frame => (
+     is       => 'ro',
+     isa      => 'SDLx::Surface',
+     lazy     => 1,
+     builder  => '_build_bg_frame',
+);
+ 
 sub _build_bg_frame { 
     my $self = shift ;
     my $s =  SDLx::Surface->new( width => 2 * $self->width, height => $self->height); 
@@ -45,20 +52,19 @@ sub _new_image {
     $self->SUPER::_new_image(@_) ;
 }
 
-sub transition {
+sub tick {
     my $self = shift;
 
     if ($self->busy) {
-        my $transition = SDLx::Surface->new( width=> $self->width, height=> $self->height) ;
-        SDL::Video::set_alpha($transition, SDL_RLEACCEL, 0xff);
+        SDL::Video::set_alpha($self->surface, SDL_RLEACCEL, 0xff);
         my $slide_mark = $self->progress( $self->width ) ;
 
-        $self->_bg_frame->blit($transition,
+        $self->_bg_frame->blit($self->surface,
             [ $slide_mark,0, $self->width + $slide_mark, $self->height ],  # source
         ) ;
-        $self->_bg_frame->update ;
+        $self->surface->update ;
         $self->inc_step ;
-        return $transition ;
+        return $self->surface ;
     }
     else {
         return $self->image ;
