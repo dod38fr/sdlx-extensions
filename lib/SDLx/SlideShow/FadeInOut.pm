@@ -1,20 +1,18 @@
-package SDLx::Fader ;
+package SDLx::SlideShow::FadeInOut ;
 
 use 5.10.1;
-
-use strict;
-use warnings;
 
 use Carp ;
 
 use SDL;
-use SDLx::App;
 use SDLx::Sprite;
 use SDLx::Surface;
 use SDL::Color ;
 
 use Any::Moose;
 use Any::Moose '::Util::TypeConstraints' ;
+
+extends 'SDLx::SlideShow::Any' ;
 
 subtype 'My::Types::SDLx::Sprite' => as class_type('SDLx::Sprite');
 class_type('SDLx::Surface');
@@ -28,8 +26,6 @@ coerce 'My::Types::SDLx::Sprite'
             return $s ;
         } ;
           
-has max_steps => ( is => 'rw', isa => 'Int',       default  => 26 );
-
 # holds old image
 has _bg_frame => (
     is       => 'ro',
@@ -41,14 +37,11 @@ has _bg_frame => (
 sub _build_bg_frame { 
     my $self = shift ;
     my $s =  SDLx::Surface->new( width => $self->width, height => $self->height); 
+    $self->image->draw($s) ;
     my $spr = SDLx::Sprite->new (
         surface => $s,
         alpha => 0xff,
     ) ;
-    # disable alpha color key stuff to avoid messing up photos
-    # SDL::Video::set_color_key( $s, 0, 0 );
-    # SDL::Video::set_alpha($s, SDL_SRCALPHA | SDL_RLEACCEL, 0xff);
-    # $s->draw_rect( undef , [ 0x80, 0x80, 0x80 ] );
     return $spr ;
 } 
 
@@ -58,41 +51,26 @@ has image => (
     handles => { qw/width w height h/ } ,
     required => 1,
     coerce => 1,
+    trigger => \&_new_image ,
 );
 
-has step => (
-    traits  => ['Counter'],
-    is      => 'rw',
-    isa     => 'Int',
-    default => 0,
-    handles => {
-        inc_step   => 'inc',
-        reset_step => 'reset',
-    }
-);
+sub _new_image {
+    my $self = shift ;
+    my ($image,$old) = @_;
 
-my $white =  SDL::Color->new(0xFF, 0xFF, 0xFF); 
-
-sub new_image {
-    my ($self,$image) = @_;
-
-    croak "new_image does not match old image size"
-        unless $image->w eq $self->width and $image->h eq $self->height ;
-
-    # blit old image
-    $self->image->alpha(0xff) ;
-    $self->image->draw($self->_bg_frame->surface);
+    return unless @_ > 1 ;
+    $self->SUPER::_new_image(@_) ;
     
-    $self->image->surface( $image );
-
-    $self->reset_step;    # will trigger a redraw on next loop
+    say "fadeinout blit old image";
+    $old->alpha(0xff) ;
+    $old->draw($self->_bg_frame->surface);
 }
 
 sub transition {
     my $self = shift;
 
-    if ( $self->step <= $self->max_steps) {
-        my $alpha = int($self->step * 0xFF / $self->max_steps)  ; 
+    if ( $self->busy ) {
+        my $alpha = $self->progress( 0xFF )  ; 
         say "alpha $alpha, other ", 0xff - $alpha ;
         my $transition = SDLx::Surface->new( width=> $self->width, height=> $self->height) ;
 
@@ -103,8 +81,7 @@ sub transition {
         $self->_bg_frame->surface->blit( $transition);
         $self->image    ->surface->blit( $transition);
 
-        $self->inc_step if $self->step <= $self->max_steps;
-
+        $self->inc_step;
         return $transition ;
     }
     else {

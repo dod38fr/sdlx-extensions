@@ -1,4 +1,4 @@
-package SDLx::Slider ;
+package SDLx::SlideShow::SlideOut ;
 
 use 5.10.1;
 
@@ -16,15 +16,7 @@ use Any::Moose;
 use Any::Moose '::Util::TypeConstraints' ;
 # use Any::Moose '::Meta::Attribute::Native::Trait::Array' ;
 
-has max_steps => ( is => 'rw', isa => 'Int',       default  => 26 );
-
-# holds old and new image side by side
-has _bg_frame => (
-    is       => 'ro',
-    isa      => 'SDLx::Surface',
-    lazy     => 1,
-    builder  => '_build_bg_frame',
-);
+extends 'SDLx::SlideShow::Any' ;
 
 sub _build_bg_frame { 
     my $self = shift ;
@@ -32,71 +24,40 @@ sub _build_bg_frame {
     # disable alpha color key stuff to avoid messing up photos
     SDL::Video::set_color_key( $s, 0, 0 );
     SDL::Video::set_alpha($s, SDL_RLEACCEL, 0);
-    $s->draw_rect( undef , [ 0x80, 0x80, 0x80 ] );
     return $s ;
-} 
+}
 
-has image => ( 
-    is => 'rw', 
-    isa => 'SDLx::Surface',
-    handles => { qw/width w height h/ } ,
-    required => 1,
-);
+sub _new_image {
+    my $self = shift ;
+    my ($image,$old) = @_;
 
-has step => (
-    traits  => ['Counter'],
-    is      => 'rw',
-    isa     => 'Int',
-    default => 0,
-    handles => {
-        inc_step   => 'inc',
-        reset_step => 'reset',
-    }
-);
-
-has background_color => (
-    is => 'rw',
-    isa => 'ArrayRef',
-    default => sub { [ 20, 50, 170, 255 ]  } ,
-) ;
-
-
-my $white =  SDL::Color->new(0xFF, 0xFF, 0xFF); 
-
-sub new_image {
-    my ($self,$image) = @_;
-
-    croak "new_image does not match old image size"
-        unless $image->w eq $self->width and $image->h eq $self->height ;
-
-    # blit old image
-    $self->image->blit($self->_bg_frame);
+    say "blitting in double sized bg_frame" ;
+    # blit old image on left side of double sized bg_frame
+    $old->blit($self->_bg_frame) if defined $old ;
     
-    $self->image( $image );
-
+    # blit new image on right side of double sized bg_frame
     $image -> blit ( 
         $self->_bg_frame, 
         undef,              # source 
-        [ $self->width + 1 , 0, $self->width, $self->height]
+        [ $self->width , 0, $self->width, $self->height]
     ) ;
 
-    $self->reset_step;    # will trigger a redraw on next loop
+    $self->SUPER::_new_image(@_) ;
 }
 
 sub transition {
     my $self = shift;
 
-    if ($self->step <= $self->max_steps) {
+    if ($self->busy) {
         my $transition = SDLx::Surface->new( width=> $self->width, height=> $self->height) ;
         SDL::Video::set_alpha($transition, SDL_RLEACCEL, 0xff);
-        my $slide_mark = int( $self->width * $self->step / $self->max_steps ) ;
+        my $slide_mark = $self->progress( $self->width ) ;
 
         $self->_bg_frame->blit($transition,
             [ $slide_mark,0, $self->width + $slide_mark, $self->height ],  # source
         ) ;
         $self->_bg_frame->update ;
         $self->inc_step ;
-
         return $transition ;
     }
     else {
