@@ -40,7 +40,7 @@ sub _new_image {
 	}
 }
 
-# slider's tick method will blit on this surface
+# slider's tick method will blit on this surface (or create a new one)
 has surface => ( 
     is => 'ro', 
     isa => 'SDLx::Surface',

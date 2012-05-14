@@ -47,7 +47,7 @@ foreach my $s_file (glob("lib/SDLx/SlideShow/*.pm")) {
     next if $test_only and ($s_class !~ /$test_only/i) ;
     $s_class =~ s!.*/!!;
     $s_class =~ s!\.pm$!! ;
-    my $slider = SDLx::SlideShow->new(image => $app, slideshow_class => $s_class) ;
+    my $slider = SDLx::SlideShow->new(image => $app, surface => $app, slideshow_class => $s_class) ;
     ok( $slider, "created $s_class slider" );
     my @l_slides = @slides ;
 
@@ -55,7 +55,7 @@ foreach my $s_file (glob("lib/SDLx/SlideShow/*.pm")) {
     
         foreach my $i (1.. 30) {
             $slider ->tick;
-            $slider->surface ->blit($app) ;
+            # $slider->surface ->blit($app) ;
             $app->sync;
             SDL::delay(10) ;
         }
