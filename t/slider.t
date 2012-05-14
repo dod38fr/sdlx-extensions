@@ -22,45 +22,59 @@ my $app = SDLx::App->new (
     exit_on_quit => 0, # quit handle by event loop
 ) ;
 
-my @slides ;
-while (@slides < 5) {
-    # create new surface to be slided over the original one
-    my $slide_in = SDLx::Surface->new(width => 800, height => 600) ;
-    $slide_in->draw_rect ( undef, 0x800080ff ) ;
-    my $c = 100 + 30 * @slides ;
-    $slide_in->draw_rect ( SDLx::Rect->new($c,$c,460,340), 0xFF00FFFF );
-    push @slides, $slide_in;
-}
-
 my $test_only = shift @ARGV || '';
 
 # my $slider = SDLx::Slider->new(image => $app) ;
 foreach my $s_file (glob("lib/SDLx/SlideShow/*.pm")) {
-    # draw original surface
-    $app->draw_rect ( undef, 0x808080ff ) ;
-    $app->draw_rect ( SDLx::Rect->new(50,50,600,400), 0xFFFF00FF );
-    $app->sync ;
-
     my $s_class = $s_file ;
     next if $s_class =~ m!/Any.pm$!;
     say "test $test_only" if $test_only;
     next if $test_only and ($s_class !~ /$test_only/i) ;
     $s_class =~ s!.*/!!;
     $s_class =~ s!\.pm$!! ;
-    my $slider = SDLx::SlideShow->new(image => $app, surface => $app, slideshow_class => $s_class) ;
-    ok( $slider, "created $s_class slider" );
-    my @l_slides = @slides ;
 
-    while (@l_slides){
+    for (my $c = 0; $c < 200 ; $c+= 50 ){
+    # draw original surface
+        $app->draw_rect ( undef, 0x808080ff ) ;
+        $app->draw_rect ( SDLx::Rect->new(50,50,600,400), 0xFFFF00FF );
+        $app->sync ;
+        my ($x, $y)= ( $c * 1.2, $c ) ;
     
-        foreach my $i (1.. 30) {
-            $slider ->tick;
-            # $slider->surface ->blit($app) ;
-            $app->sync;
-            SDL::delay(10) ;
+        my @slides ;
+        while (@slides < 5) {
+            # create new surface to be slided over the original one
+            my ($w,$h) = ( 800 - $c* 1.5 , 600 - $c * 1.5 ) ;
+            my $slide_in = SDLx::Surface->new( width => $w, height => $h ) ;
+            if (@slides) {
+                $slide_in->draw_rect ( undef, 0x800080ff ) ;
+                my $c2 = 100 + 30 * @slides ;
+                $slide_in->draw_rect ( SDLx::Rect->new($c2,$c2,260,140), 0xFF00FFFF );
+            }
+            else {
+                $app->blit($slide_in, [ $x, $y, $w,$h] ) ;
+            }
+            push @slides, $slide_in;
         }
 
-        $slider->image(shift @l_slides) ;
+        my $slider = SDLx::SlideShow->new(
+            image => shift @slides, 
+            surface => $app, 
+            slideshow_class => $s_class,
+            x => $c * 1.2,
+            y => $c,
+        ) ;
+        ok( $slider, "created $s_class slider with c $c" );
+        
+        while (@slides){
+            foreach my $i (1.. 30) {
+                $slider ->tick;
+                # $slider->surface ->blit($app) ;
+                $app->sync;
+                SDL::delay(10) ;
+            }
+
+            $slider->image(shift @slides) ;
+        }
     }
 }
 

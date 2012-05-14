@@ -24,6 +24,8 @@ has surface => (
     required     => 1,
 );
 
+has [qw/x y/] => (is => 'ro', isa => 'Int', default => 0 );
+
 has image => ( 
     is => 'rw', 
     isa => 'SDLx::Surface',

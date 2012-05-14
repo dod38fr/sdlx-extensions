@@ -27,8 +27,9 @@ sub tick {
         my $slide_mark  = $self->regress( $self->width ) ;
         my $slide_width = int( $self->width / $max_s ) + 1 ;
 
-        my $rect_to_blit = [ $slide_mark,0, $slide_width, $self->height ] ;
-        $self->image->blit($self->surface, $rect_to_blit, $rect_to_blit) ;
+        my $from_rect = [ $slide_mark,0, $slide_width, $self->height ] ;
+        my $to_rect   = [ $slide_mark + $self->x , $self->y, 0 ,0 ] ;
+        $self->image->blit($self->surface, $from_rect, $to_rect) ;
         $self->surface->update ;
         $self->inc_step ;
     }

@@ -76,10 +76,11 @@ sub tick {
 
         $self->image->alpha($alpha) ;
         $self->_bg_frame->alpha(0xff - $alpha) ;
+        my $tg = [ $self->x, $self->y, 0 ,0] ;
 
         # draw fading image on frame
-        $self->_bg_frame->surface->blit( $transition);
-        $self->image    ->surface->blit( $transition);
+        $self->_bg_frame->surface->blit( $transition, undef, $tg);
+        $self->image    ->surface->blit( $transition, undef, $tg);
         $transition->update ;
 
         $self->inc_step;

@@ -1,6 +1,7 @@
 package SDLx::SlideShow;
 
 use Any::Moose;
+use Any::Moose 'X::StrictConstructor' ;
 use 5.10.1;
 use Carp;
 use SDL;
@@ -54,9 +55,11 @@ sub _build_surface {
     my $s = SDLx::Surface->new( width => $self->width, height => $self->height );
     SDL::Video::set_color_key( $s, 0, 0 );
     SDL::Video::set_alpha( $s, SDL_RLEACCEL, 0 );
-    $self->image->blit($s);
+    $self->image->blit($s,undef, [ $self->x, $self->y, 0, 0 ]);
     return $s;
 }
+
+has [qw/x y/] => (is => 'ro', isa => 'Int', default => 0 );
 
 has 'slider' => (
     is      => 'ro',
@@ -80,7 +83,12 @@ sub _build_slider {
         die "Could not parse $file_to_load: $@\n";
     }
 
-    $slide_class->new( image => $self->image, surface => $self->surface );
+    $slide_class->new( 
+        image => $self->image, 
+        surface => $self->surface, 
+        x => $self->x , 
+        y=>$self->y 
+    );
 }
 
 __PACKAGE__->meta->make_immutable;    # Makes it faster at the cost of startup time

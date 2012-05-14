@@ -60,7 +60,8 @@ sub tick {
         my $slide_mark = $self->progress( $self->width ) ;
 
         $self->_bg_frame->blit($self->surface,
-            [ $slide_mark,0, $self->width + $slide_mark, $self->height ],  # source
+            [ $slide_mark,0, $self->width, $self->height ],  # source
+            [ $self->x, $self->y,0,0]
         ) ;
         $self->surface->update ;
         $self->inc_step ;
