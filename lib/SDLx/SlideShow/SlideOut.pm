@@ -36,18 +36,18 @@ sub _build_bg_frame {
 
 sub _new_image {
     my $self = shift ;
+
     my ($image,$old) = @_;
 
-    say "blitting in double sized bg_frame" ;
-    # blit old image on left side of double sized bg_frame
-    $old->blit($self->_bg_frame) if defined $old ;
+    return unless defined $old ;
+
+    my $bg = $self->_bg_frame ;
+
+    # blit on left side of double sized bg_frame
+    $old->blit($bg) ;
     
     # blit new image on right side of double sized bg_frame
-    $image -> blit ( 
-        $self->_bg_frame, 
-        undef,              # source 
-        [ $self->width , 0, $self->width, $self->height]
-    ) ;
+    $image -> blit ( $bg, undef, [ $image->w, 0, 0, 0 ] ) ;
 
     $self->SUPER::_new_image(@_) ;
 }
@@ -65,11 +65,9 @@ sub tick {
         ) ;
         $self->surface->update ;
         $self->inc_step ;
-        return $self->surface ;
     }
-    else {
-        return $self->image ;
-    }
+
+    return $self->surface ;
 }
 
 __PACKAGE__->meta->make_immutable();
