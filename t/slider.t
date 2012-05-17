@@ -14,6 +14,7 @@ use SDLx::App ;
 use SDLx::Rect ;
 use SDLx::SlideShow ;
 use SDLx::Surface ;
+use SDLx::Text ;
 
 my $app = SDLx::App->new (
     title => 'dumb test',
@@ -49,6 +50,14 @@ foreach my $s_file (glob("lib/SDLx/SlideShow/*.pm")) {
                 $slide_in->draw_rect ( undef, 0x800080ff ) ;
                 my $c2 = 100 + 30 * @slides ;
                 $slide_in->draw_rect ( SDLx::Rect->new($c2,$c2,260,140), 0xFF00FFFF );
+                my $texter = SDLx::Text->new(
+                    font    => '/usr/share/fonts/truetype/msttcorefonts/comic.ttf',
+                    color   => [ 0xff, 0xff, 0xff] ,
+                    size    => 50,
+                    h_align => 'left',
+                    text    => "nb ". scalar @slides ,
+                );
+                $texter->write_xy($slide_in, 10,10) ;
             }
             else {
                 $app->blit($slide_in, [ $x, $y, $w,$h] ) ;
@@ -70,7 +79,7 @@ foreach my $s_file (glob("lib/SDLx/SlideShow/*.pm")) {
                 $slider ->tick;
                 # $slider->surface ->blit($app) ;
                 $app->sync;
-                SDL::delay(10) ;
+                SDL::delay(20) ;
             }
 
             $slider->image(shift @slides) ;
