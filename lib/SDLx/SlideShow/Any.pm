@@ -15,7 +15,7 @@ use Any::Moose;
 use Any::Moose '::Util::TypeConstraints' ;
 # use Any::Moose '::Meta::Attribute::Native::Trait::Array' ;
 
-has max_steps => ( is => 'rw', isa => 'Int', default  => 26 );
+has max_steps => ( is => 'rw', isa => 'Int', required => 1 );
 
 # tick method will draw on this surface
 has surface => (
@@ -37,6 +37,7 @@ has image => (
 
 # step = 0 -> idle
 # step > 0 and < max_steps -> transitioning
+# internal
 has step => (
     traits  => ['Counter'],
     is      => 'rw',
@@ -61,11 +62,13 @@ sub busy {
     return 0 ;
 }
 
+#internal
 sub progress {
     my ($self,$value) = @_;
     return int($self->step * $value / $self->max_steps )  ; 
 }
 
+#internal
 sub regress {
     my ($self,$value) = @_;
     return int(($self->max_steps - $self->step) * $value / $self->max_steps)  ; 
