@@ -20,6 +20,8 @@ sub _new_slider {
     $self->{slider} = $self->_build_slider;
 }
 
+has max_steps => ( is => 'rw', isa => 'Int', default  => 26 );
+
 has image => (
     is       => 'rw',
     isa      => 'SDLx::Surface',
@@ -86,6 +88,7 @@ sub _build_slider {
     $slide_class->new( 
         image => $self->image, 
         surface => $self->surface, 
+        max_steps => $self->max_steps,
         x => $self->x , 
         y=>$self->y 
     );
