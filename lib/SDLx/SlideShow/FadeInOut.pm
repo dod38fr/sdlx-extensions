@@ -44,35 +44,35 @@ sub _build_bg_frame {
     return $spr ;
 } 
 
-has image => ( 
+has _image => ( 
     is => 'rw', 
     isa => 'My::Types::SDLx::Sprite',
     coerce => 1,
-    trigger => \&_new_image ,
 );
 
-sub _new_image {
-    my $self = shift ;
-    my ($image,$old) = @_;
-
-    $self->SUPER::_new_image(@_) ;
+sub _show_new_image {
+    my ($self,$image) = @_;
+    
+    $self->_image($image) ;
     $self->surface->blit($self->_bg_frame->surface, $self->rect ) ;
 }
 
 sub tick {
     my $self = shift;
 
+    $self->SUPER::tick ;
+
     if ( $self->busy ) {
         my $alpha = $self->progress( 0xFF )  ; 
         
-        $self->image->alpha($alpha) ;
+        $self->_image->alpha($alpha) ;
         $self->_bg_frame->alpha(0xff - $alpha) ;
 
         my $transition = $self->surface;
 
         # draw fading image on frame
         $self->_bg_frame->surface->blit( $transition, undef, $self->rect);
-        $self->image    ->surface->blit( $transition, undef, $self->rect);
+        $self->_image    ->surface->blit( $transition, undef, $self->rect);
         $transition->update ;
 
         $self->inc_step;

@@ -34,10 +34,8 @@ sub _build_bg_frame {
     return $s ;
 }
 
-sub _new_image {
-    my $self = shift ;
-
-    my ($image,$old) = @_;
+sub _show_new_image {
+    my ($self,$image) = @_;
 
     my $bg = $self->_bg_frame ;
 
@@ -47,11 +45,12 @@ sub _new_image {
     # blit new image on right side of double sized bg_frame
     $image -> blit ( $bg, undef, [ $image->w, 0, 0, 0 ] ) ;
 
-    $self->SUPER::_new_image(@_) ;
 }
 
 sub tick {
     my $self = shift;
+
+    $self->SUPER::tick ;
 
     if ($self->busy) {
         SDL::Video::set_alpha($self->surface, SDL_RLEACCEL, 0xff);

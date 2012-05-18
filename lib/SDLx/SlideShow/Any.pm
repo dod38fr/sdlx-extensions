@@ -40,11 +40,15 @@ sub _build_rect {
 }
 
 
-has image => ( 
+has _image => ( 
     is => 'rw', 
     isa => 'SDLx::Surface',
-    # trigger are function and cannot be used by daughter classes. work around that
-    trigger => sub { my $self = shift; $self->_new_image(@_) } ,
+);
+
+has _pending_image => ( 
+    is => 'rw', 
+    isa => 'Maybe[SDLx::Surface]',
+    clearer => 'clear_pending_image' ,
 );
 
 # step = 0 -> idle
@@ -86,14 +90,30 @@ sub regress {
     return int(($self->max_steps - $self->step) * $value / $self->max_steps)  ; 
 }
 
-# WARNING: does not work (yet) with Mouse
-# see https://rt.cpan.org/Ticket/Display.html?id=76880
-sub _new_image {
-    my ($self,$image,$old) = @_;
-
-    $self->start;
+sub image {
+    my ($self,$image) = @_;
+    
+    if ( $image->w ne $self->width or $image->h ne $self->height ) {
+        croak "new image does not match slider size";
+    }
+    
+    $self->_pending_image($image) unless $self->_pending_image;
 }
 
+sub tick {
+    my $self = shift;
+    
+    if ($self->_pending_image and not $self->busy) {
+        $self->_show_new_image($self->clear_pending_image) ;
+        $self->start ;
+    }
+    
+}
+
+sub _show_new_image {
+    my $self = shift;
+    $self->_image(shift) ;
+}
 
 __PACKAGE__->meta->make_immutable();
 

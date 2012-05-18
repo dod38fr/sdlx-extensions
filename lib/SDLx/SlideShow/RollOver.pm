@@ -21,6 +21,8 @@ extends 'SDLx::SlideShow::Any' ;
 sub tick {
     my $self = shift;
 
+    $self->SUPER::tick ;
+
     if ($self->busy) {
         my $max_s = $self->max_steps ;
         my $s = $self->step ;
@@ -29,7 +31,7 @@ sub tick {
 
         my $from_rect = [ $slide_mark,0, $slide_width, $self->height ] ;
         my $to_rect   = [ $slide_mark + $self->x , $self->y, 0 ,0 ] ;
-        $self->image->blit($self->surface, $from_rect, $to_rect) ;
+        $self->_image->blit($self->surface, $from_rect, $to_rect) ;
         $self->surface->update ;
         $self->inc_step ;
     }

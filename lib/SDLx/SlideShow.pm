@@ -22,23 +22,7 @@ sub _new_slider {
 
 has max_steps => ( is => 'rw', isa => 'Int', default  => 26 );
 
-has image => (
-    is       => 'rw',
-    isa      => 'SDLx::Surface',
-    trigger  => \&_new_image,
-);
-
-sub _new_image {
-    my ( $self, $new_image, $old_image ) = @_;
-
-    if ( $new_image->w ne $self->width or $new_image->h ne $self->height ) {
-        croak "new image does not match slider size";
-    }
-
-    $self->slider->image($new_image);
-}
-
-# slider's tick method will blit on this surface (or create a new one)
+# slider's tick method will blit on this surface
 has surface => (
     is      => 'ro',
     isa     => 'SDLx::Surface',
@@ -74,7 +58,7 @@ sub _build_height {
 has 'slider' => (
     is      => 'ro',
     isa     => 'SDLx::SlideShow::Any',
-    handles => [qw/tick busy/],
+    handles => [qw/tick busy image/],
     lazy    => 1,
     builder => '_build_slider',
 );
