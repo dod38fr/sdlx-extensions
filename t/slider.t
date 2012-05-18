@@ -40,13 +40,13 @@ foreach my $s_file (glob("lib/SDLx/SlideShow/*.pm")) {
         $app->draw_rect ( SDLx::Rect->new(50,50,600,400), 0xFFFF00FF );
         $app->sync ;
         my ($x, $y)= ( $c * 1.2, $c ) ;
+        my ($w,$h) = ( 800 - $c* 1.5 , 600 - $c * 1.5 ) ;
     
         my @slides ;
         while (@slides < 5) {
             # create new surface to be slided over the original one
-            my ($w,$h) = ( 800 - $c* 1.5 , 600 - $c * 1.5 ) ;
             my $slide_in = SDLx::Surface->new( width => $w, height => $h ) ;
-            if (@slides) {
+            if (1 or @slides) {
                 $slide_in->draw_rect ( undef, 0x800080ff ) ;
                 my $c2 = 100 + 30 * @slides ;
                 $slide_in->draw_rect ( SDLx::Rect->new($c2,$c2,260,140), 0xFF00FFFF );
@@ -66,11 +66,13 @@ foreach my $s_file (glob("lib/SDLx/SlideShow/*.pm")) {
         }
 
         my $slider = SDLx::SlideShow->new(
-            image => shift @slides, 
+            # image => shift @slides, 
             surface => $app, 
             slideshow_class => $s_class,
             x => $c * 1.2,
             y => $c,
+            width => $w,
+            height => $h,
         ) ;
         ok( $slider, "created $s_class slider with c $c" );
         

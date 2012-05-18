@@ -26,11 +26,23 @@ has surface => (
 
 has [qw/x y/] => (is => 'ro', isa => 'Int', default => 0 );
 
+has [qw/width height/ ] => (
+    is => 'ro', 
+    isa => 'Int', 
+    required => 1,
+);
+
+has 'rect' => ( is => 'ro', isa => 'ArrayRef[Int]', lazy => 1, builder => '_build_rect') ;
+
+sub _build_rect {
+    my $self = shift;
+    return [ $self->x, $self->y, $self->width, $self->height] ;
+}
+
+
 has image => ( 
     is => 'rw', 
     isa => 'SDLx::Surface',
-    handles => { qw/width w height h/ } ,
-    required => 1,
     # trigger are function and cannot be used by daughter classes. work around that
     trigger => sub { my $self = shift; $self->_new_image(@_) } ,
 );
@@ -78,10 +90,6 @@ sub regress {
 # see https://rt.cpan.org/Ticket/Display.html?id=76880
 sub _new_image {
     my ($self,$image,$old) = @_;
-
-    return unless @_ > 2 ;
-    croak "new image does not match old image size"
-        unless $image->w eq $old->w and $image->h eq $old->h ;
 
     $self->start;
 }

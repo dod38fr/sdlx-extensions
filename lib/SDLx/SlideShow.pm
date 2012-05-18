@@ -25,43 +25,51 @@ has max_steps => ( is => 'rw', isa => 'Int', default  => 26 );
 has image => (
     is       => 'rw',
     isa      => 'SDLx::Surface',
-    handles  => {qw/width w height h/},
-    required => 1,
     trigger  => \&_new_image,
 );
 
 sub _new_image {
     my ( $self, $new_image, $old_image ) = @_;
 
-    return unless defined $old_image;
+    if ( $new_image->w ne $self->width or $new_image->h ne $self->height ) {
+        croak "new image does not match slider size";
+    }
 
-    if ( $new_image->w ne $old_image->w or $new_image->h ne $old_image->h ) {
-        croak "new image does not match old image size";
-    }
-    else {
-        $self->slider->image($new_image);
-    }
+    $self->slider->image($new_image);
 }
 
 # slider's tick method will blit on this surface (or create a new one)
 has surface => (
     is      => 'ro',
     isa     => 'SDLx::Surface',
-    lazy    => 1,
-    builder => '_build_surface',
+    required    => 1,
 );
 
-sub _build_surface {
-    my $self = shift;
+has [qw/x y/] => (is => 'ro', isa => 'Int', default => 0 );
 
-    my $s = SDLx::Surface->new( width => $self->width, height => $self->height );
-    SDL::Video::set_color_key( $s, 0, 0 );
-    SDL::Video::set_alpha( $s, SDL_RLEACCEL, 0 );
-    $self->image->blit($s,undef, [ $self->x, $self->y, 0, 0 ]);
-    return $s;
+has width => (
+    is => 'ro', 
+    isa => 'Int', 
+    lazy => 1,
+    builder => '_build_width' ,
+);
+
+sub _build_width {
+    my $self = shift;
+    $self->surface->w ;
 }
 
-has [qw/x y/] => (is => 'ro', isa => 'Int', default => 0 );
+has height => (
+    is => 'ro', 
+    isa => 'Int', 
+    lazy => 1,
+    builder => '_build_height'
+);
+
+sub _build_height {
+    my $self = shift;
+    $self->surface->h ;
+}
 
 has 'slider' => (
     is      => 'ro',
@@ -86,11 +94,12 @@ sub _build_slider {
     }
 
     $slide_class->new( 
-        image => $self->image, 
         surface => $self->surface, 
         max_steps => $self->max_steps,
         x => $self->x , 
-        y=>$self->y 
+        y => $self->y ,
+        height => $self->height,
+        width => $self->width,
     );
 }
 

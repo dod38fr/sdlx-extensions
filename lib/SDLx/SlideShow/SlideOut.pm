@@ -39,12 +39,10 @@ sub _new_image {
 
     my ($image,$old) = @_;
 
-    return unless defined $old ;
-
     my $bg = $self->_bg_frame ;
 
     # blit on left side of double sized bg_frame
-    $old->blit($bg) ;
+    $self->surface->blit($bg,[ $self->x, $self->y, $self->width, $self->height ]) ;
     
     # blit new image on right side of double sized bg_frame
     $image -> blit ( $bg, undef, [ $image->w, 0, 0, 0 ] ) ;
