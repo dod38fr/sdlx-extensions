@@ -49,6 +49,7 @@ has _pending_image => (
     is => 'rw', 
     isa => 'Maybe[SDLx::Surface]',
     clearer => 'clear_pending_image' ,
+    predicate => 'has_pending_image' ,
 );
 
 # step = 0 -> idle
@@ -72,6 +73,14 @@ sub start {
 }
 
 sub busy {
+    my $self = shift;
+    my $b = ($self->sliding or $self->has_pending_image)  ? 1 : 0; 
+    # say "busy $b" ;
+    return $b ;
+}
+
+
+sub sliding {
     my $self = shift;
     my $s = $self->step ;
     return 1 if $s and $s <= $self->max_steps ;
@@ -103,7 +112,7 @@ sub image {
 sub tick {
     my $self = shift;
     
-    if ($self->_pending_image and not $self->busy) {
+    if ($self->has_pending_image and not $self->sliding) {
         $self->_show_new_image($self->clear_pending_image) ;
         $self->start ;
     }
