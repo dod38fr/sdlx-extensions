@@ -58,7 +58,7 @@ sub _build_height {
 has 'slider' => (
     is      => 'ro',
     isa     => 'SDLx::SlideShow::Any',
-    handles => [qw/tick busy image/],
+    handles => [qw/tick busy image sliding/],
     lazy    => 1,
     builder => '_build_slider',
 );
