@@ -68,7 +68,6 @@ has step => (
 
 sub start {
     my $self = shift;
-    say "start ",ref($self) ;
     $self->step( 1 ) ;
 }
 
