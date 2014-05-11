@@ -1,7 +1,7 @@
 package SDLx::SlideShow;
 
-use Any::Moose;
-use Any::Moose 'X::StrictConstructor' ;
+use Moose;
+use MooseX::StrictConstructor ;
 use 5.10.1;
 use Carp;
 use SDL;

@@ -12,9 +12,9 @@ use SDLx::App;
 use SDLx::Surface;
 use SDL::Color ;
 
-use Any::Moose;
-use Any::Moose '::Util::TypeConstraints' ;
-# use Any::Moose '::Meta::Attribute::Native::Trait::Array' ;
+use Moose;
+use Moose::Util::TypeConstraints ;
+# use Moose '::Meta::Attribute::Native::Trait::Array' ;
 
 extends 'SDLx::SlideShow::Any' ;
 

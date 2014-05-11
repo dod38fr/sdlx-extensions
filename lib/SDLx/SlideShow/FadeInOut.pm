@@ -9,8 +9,8 @@ use SDLx::Sprite;
 use SDLx::Surface;
 use SDL::Color ;
 
-use Any::Moose;
-use Any::Moose '::Util::TypeConstraints' ;
+use Moose;
+use Moose::Util::TypeConstraints ;
 
 extends 'SDLx::SlideShow::Any' ;
 
